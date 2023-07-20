@@ -22,16 +22,24 @@ fun Application.configureTelegramBot() {
 }
 
 fun BotHandling.startCommand() {
-    command("start") { (pathParam, lineParam) ->
-        sendMessage(chatId = chatId, text = "param from path = '$pathParam', param from line = '$lineParam'")
+    command("/start", answerHandler = "get_user_name") { (pathParam, lineParam) ->
+        sendMessage(chatId = chatId, text = "Введите своё имя")
+    }
 
-        nextMessage(chatId, "get_user_name")
+    messageHandler("get_user_name", answerHandler = "get_user_surname") {
+        sendMessage(chatId, "Привет, $text!")
+//        throw RuntimeException("тестовая ошибка")
+        sendMessage(chatId, "А введи, пожалуйста, свою фамилию :)")
+    }
+
+    messageHandler("get_user_surname") {
+        sendMessage(chatId, "А мне нравится Фамилия '$text')")
     }
 }
 
 fun BotHandling.otherHandler() {
 
-    handler("get_user_name") {
+    handler("other_handler") {
 
         sendMessage(chatId = chatId, text = "hand")
     }
