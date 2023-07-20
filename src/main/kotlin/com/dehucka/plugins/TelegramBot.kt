@@ -1,10 +1,8 @@
 package com.dehucka.plugins
 
 import com.dehucka.library.bot.BotHandling
-import com.dehucka.library.bot.SomeService
-import com.dehucka.library.bot.inject
+import com.dehucka.library.bot.chatId
 import com.dehucka.library.plugins.bot.TelegramBot
-import com.elbekd.bot.model.toChatId
 import io.ktor.server.application.*
 
 
@@ -24,21 +22,17 @@ fun Application.configureTelegramBot() {
 }
 
 fun BotHandling.startCommand() {
+    command("start") { (pathParam, lineParam) ->
+        sendMessage(chatId = chatId, text = "param from path = '$pathParam', param from line = '$lineParam'")
 
-    command("/start") { (message, text) ->
-        sendMessage(chatId = message.chat.id.toChatId(), text = "Введите имя")
-    }
-
-    command("/start", step = 1) { (message, text) ->
-        sendMessage(chatId = message.chat.id.toChatId(), text = "Здравствуйте, $text!")
-        sendMessage(message.chat.id.toChatId(), "Очень рад Вас видеть!")
+        nextMessage(chatId, "get_user_name")
     }
 }
 
 fun BotHandling.otherHandler() {
-    val someService = inject<SomeService>()
 
-    handle("other_after_button_press") { callback ->
-        sendMessage(chatId = callback.from.id.toChatId(), text = "${callback.data}")
+    handler("get_user_name") {
+
+        sendMessage(chatId = chatId, text = "hand")
     }
 }

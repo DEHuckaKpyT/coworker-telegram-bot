@@ -1,5 +1,6 @@
 package com.dehucka.library.bot
 
+import com.elbekd.bot.types.Message
 import org.koin.core.Koin
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.ParametersDefinition
@@ -56,3 +57,6 @@ fun <T : Any> BotHandling.getProperty(key: String) =
  */
 fun BotHandling.getProperty(key: String, defaultValue: String) =
     getKoin().getProperty(key) ?: defaultValue
+
+val Message.chatId
+    get() = chat.id
