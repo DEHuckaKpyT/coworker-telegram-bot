@@ -28,12 +28,14 @@ fun Application.configureTelegramBot() {
     }
 }
 
+/** в команде передаются параметры. например, из команды /com_and__par_1 par 2 получатся pathParam = par_1 и lineParam = par 2 */
 fun BotHandling.paramsCommand() {
     command("/command_with_params", nextStep = "get_user_name") { (pathParam, lineParam) ->
         sendMessage(chatId = chatId, text = "Я вижу, что path param = $pathParam, а line param = $lineParam")
     }
 }
 
+/** работают цепочки команд */
 fun BotHandling.chainCommand() {
     command("/simple_chain", nextStep = "get_user_name") {
         sendMessage(chatId = chatId, text = "Введите своё имя")
@@ -49,6 +51,7 @@ fun BotHandling.chainCommand() {
     }
 }
 
+/** цепочки команд можно изменять прям на ходу */
 fun BotHandling.customChainCommand() {
     command("/custom_chain", nextStep = "определить чётность") {
         sendMessage(chatId = chatId, text = "Введите любую строку")
@@ -77,6 +80,7 @@ fun BotHandling.customChainCommand() {
     }
 }
 
+/** в цепочке можно передавать объект между шагами */
 fun BotHandling.chainWithSavingCommand() {
     data class TestFullName(
         val lastName: String,
@@ -108,24 +112,9 @@ fun BotHandling.chainWithSavingCommand() {
     }
 }
 
-fun BotHandling.errorCommand() {
-    command("/error") {
-        throw RuntimeException("Любой текст")
-    }
-
-    command("/expected_error") {
-        throw CustomException("Ожидаемая какая-то ошибка")
-    }
-
-    command("/step_error", nextStep = "error_step") {
-        sendMessage(chatId, "next message will error")
-    }
-
-    step("error_step") {
-        throw CustomException("error on message '$text'")
-    }
-}
-
+/** работа callback'ов в кнопках.
+ * если callback получается не больше 64 символов, то просто отправляется строкой.
+ * если больше 64, то сохраняется в бд и отправляется только id сущности */
 fun BotHandling.callCommand() {
     data class TestCallback(
         val field: String
@@ -154,5 +143,23 @@ fun BotHandling.callCommand() {
 
     callback<TestCallback>("with_long_callback") { testCallback ->
         sendMessage(chatId, "Был передан объект (с длиной callback'а больше 64 символов) $testCallback")
+    }
+}
+
+fun BotHandling.errorCommand() {
+    command("/error") {
+        throw RuntimeException("Текст выведется только в консоль")
+    }
+
+    command("/expected_error") {
+        throw CustomException("Ожидаемая какая-то ошибка, отправляемая пользователю в чат")
+    }
+
+    command("/step_error", nextStep = "error_step") {
+        sendMessage(chatId, "next message will error")
+    }
+
+    step("error_step") {
+        throw CustomException("error on message '$text'")
     }
 }
