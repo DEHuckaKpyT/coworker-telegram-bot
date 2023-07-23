@@ -2,6 +2,7 @@ package com.dehucka.library.bot
 
 import com.dehucka.library.bot.data.CommandInput
 import com.dehucka.library.exception.CustomException
+import com.dehucka.library.mapper
 import com.dehucka.library.source.callback.CallbackContentSource
 import com.dehucka.library.source.chain.ChainSource
 import com.dehucka.library.source.message.MessageSource
@@ -30,7 +31,7 @@ open class TelegramBotChaining(
 ) : TelegramBotMethods(bot, messageSource) {
 
     val actionByCommand: MutableMap<String, suspend Message.(Pair<String?, String?>) -> Unit> = hashMapOf()
-    val actionByStep: MutableMap<String, suspend Message.() -> Unit> = hashMapOf()
+    val actionByStep: MutableMap<String, suspend Message.(String?) -> Unit> = hashMapOf()
     val actionByCallback: MutableMap<String, suspend CallbackQuery.(String) -> Unit> = hashMapOf()
 
     val callbackDataDelimiter: Char = '|'
@@ -70,6 +71,12 @@ open class TelegramBotChaining(
         chainSource.save(chatId, null)
     }
 
+    suspend fun toNextStep(chatId: Long, instance: Any) {
+        mapper.writeValueAsString(instance).let {
+            chainSource.saveContent(chatId, it)
+        }
+    }
+
     private suspend fun processUpdate(update: Update) {
         if (update !is UpdateMessage) return
 
@@ -93,15 +100,16 @@ open class TelegramBotChaining(
     }
 
     private suspend fun processMessage(message: Message) = with(message) {
-        chainSource.get(chatId).step?.let { step ->
+        val chainLink = chainSource.get(chatId)
+        chainLink.step?.let { step ->
             actionByStep[step]
         }?.run {
-            this()
+            this(chainLink.content)
         } ?: whenStepNotFound(chatId)
     }
 
-    private suspend fun processCallback(callback: CallbackQuery) {
-        val data = callback.data ?: return
+    private suspend fun processCallback(callback: CallbackQuery) = with(callback) {
+        val data = data ?: return
 
         val indexOfDelimiter = data.indexOf(callbackDataDelimiter)
         if (indexOfDelimiter == -1) return
@@ -109,7 +117,7 @@ open class TelegramBotChaining(
         val callbackName = data.substring(0, indexOfDelimiter)
         val callbackContent = data.substring(indexOfDelimiter + 1)
 
-        tryExecute(callback.chatId) {
+        tryExecute(chatId) {
             actionByCallback[callbackName]?.invoke(callback, callbackContent)
         }
     }

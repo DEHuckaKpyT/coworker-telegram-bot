@@ -10,6 +10,8 @@ import com.dehucka.library.model.Chain
  * @author Denis Matytsin
  */
 interface ChainSource {
-    suspend fun save(chatId: Long, step: String? = null, content: String? = null): Chain
+    suspend fun save(chatId: Long, step: String? = null): Chain
+    suspend fun save(chatId: Long, step: String? = null, content: String?): Chain
     suspend fun get(chatId: Long): Chain
+    suspend fun saveContent(chatId: Long, content: String?): Chain
 }

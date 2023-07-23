@@ -18,15 +18,47 @@ import io.ktor.server.application.*
 fun Application.configureTelegramBot() {
     install(TelegramBot) {
         handling {
+            chainCommand()
+            chainWithSavingCommand()
             errorCommand()
             callCommand()
-            chainCommand()
         }
     }
 }
 
+fun BotHandling.chainWithSavingCommand() {
+    data class TestFullName(
+        val lastName: String,
+        val firstName: String,
+        val middleName: String
+    )
+
+    command("/chain_with_saving", nextStep = "get_first_name") {
+        sendMessage(chatId = chatId, text = "Введи своё имя")
+    }
+
+    step("get_first_name", nextStep = "get_last_name") {
+        sendMessage(chatId, "Привет, $text!")
+        sendMessage(chatId, "Введи фамилию")
+
+        toNextStep(chatId, text!!)
+    }
+
+    step<String>("get_last_name", nextStep = "get_middle_name") { name ->
+        sendMessage(chatId, "$name $text, введи своё отчество")
+
+        toNextStep(chatId, text to name)
+    }
+
+    step<Pair<String, String>>("get_middle_name") { (lastname, firstname) ->
+        val user = TestFullName(lastname, firstname, text!!)
+
+        sendMessage(chatId, "Записан такой экземпляр: $user")
+    }
+}
+
 fun BotHandling.chainCommand() {
-    command("/chain", nextStep = "get_user_name") { (pathParam, lineParam) ->
+    command("/simple_chain", nextStep = "get_user_name") {
         sendMessage(chatId = chatId, text = "Введите своё имя")
     }
 
@@ -36,7 +68,7 @@ fun BotHandling.chainCommand() {
     }
 
     step("get_user_surname") {
-        sendMessage(chatId, "А мне нравится Фамилия '$text')")
+        sendMessage(chatId, "А мне нравится фамилия '$text')\nНо у меня нигде не сохранилось твоё имя(")
     }
 }
 

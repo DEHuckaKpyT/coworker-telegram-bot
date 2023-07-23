@@ -46,6 +46,20 @@ open class BotHandling(
         }
     }
 
+    inline fun <reified T> step(
+        step: String,
+        nextStep: String? = null,
+        crossinline action: suspend Message.(T) -> Unit
+    ) {
+        actionByStep[step] = { content ->
+            content ?: throw RuntimeException("Ожидается экземпляр класса ${T::class.simpleName}, но в chainSource.content ничего не сохранено.")
+
+            val instance = mapper.readValue<T>(content)
+            this.action(instance)
+            chainSource.save(chatId, nextStep)
+        }
+    }
+
     inline fun callback(
         callback: String,
         nextStep: String? = null,
