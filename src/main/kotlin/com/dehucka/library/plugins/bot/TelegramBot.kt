@@ -2,7 +2,6 @@ package com.dehucka.library.plugins.bot
 
 import com.dehucka.library.bot.BotHandling
 import com.dehucka.library.plugins.bot.config.TelegramBotConfig
-import com.dehucka.library.source.MessageSourceImpl
 import com.elbekd.bot.Bot
 import io.ktor.server.application.*
 import io.ktor.server.application.hooks.*

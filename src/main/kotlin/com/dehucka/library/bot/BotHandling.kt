@@ -1,12 +1,17 @@
 package com.dehucka.library.bot
 
-import com.dehucka.library.source.ChainSource
-import com.dehucka.library.source.ChainSourceImpl
-import com.dehucka.library.source.MessageSource
-import com.dehucka.library.source.MessageSourceImpl
+import com.dehucka.library.mapper
+import com.dehucka.library.source.callback.CallbackContentSource
+import com.dehucka.library.source.callback.CallbackContentSourceImpl
+import com.dehucka.library.source.chain.ChainSource
+import com.dehucka.library.source.chain.ChainSourceImpl
+import com.dehucka.library.source.message.MessageSource
+import com.dehucka.library.source.message.MessageSourceImpl
+import com.dehucka.library.toUUID
 import com.elbekd.bot.Bot
 import com.elbekd.bot.types.CallbackQuery
 import com.elbekd.bot.types.Message
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.application.*
 
 
@@ -16,16 +21,17 @@ import io.ktor.server.application.*
  *
  * @author Denis Matytsin
  */
-class BotHandling(
+open class BotHandling(
     application: Application,
     bot: Bot,
     username: String,
     messageSource: MessageSource = MessageSourceImpl(),
-    chainSource: ChainSource = ChainSourceImpl()
-) : TelegramBotChaining(application, bot, username, messageSource, chainSource) {
+    chainSource: ChainSource = ChainSourceImpl(),
+    callbackContentSource: CallbackContentSource = CallbackContentSourceImpl()
+) : TelegramBotChaining(application, bot, username, messageSource, chainSource, callbackContentSource) {
 
-    fun command(
-        command: String, nextStep: String? = null, action: suspend Message.(Pair<String?, String?>) -> Unit
+    inline fun command(
+        command: String, nextStep: String? = null, crossinline action: suspend Message.(Pair<String?, String?>) -> Unit
     ) {
         actionByCommand[command] = {
             this.action(it)
@@ -33,17 +39,41 @@ class BotHandling(
         }
     }
 
-    fun message(step: String, answerMessage: String? = null, action: suspend Message.() -> Unit) {
+    inline fun step(step: String, nextStep: String? = null, crossinline action: suspend Message.() -> Unit) {
         actionByStep[step] = {
             this.action()
-            chainSource.save(chatId, answerMessage)
+            chainSource.save(chatId, nextStep)
         }
     }
 
-    fun callback(callback: String, answerMessage: String? = null, action: suspend CallbackQuery.() -> Unit) {
+    inline fun callback(
+        callback: String,
+        nextStep: String? = null,
+        crossinline action: suspend CallbackQuery.() -> Unit
+    ) {
         actionByCallback[callback] = {
             this.action()
-            chainSource.save(chatId, answerMessage)
+            chainSource.save(chatId, nextStep)
+        }
+    }
+
+    inline fun <reified T> callback(
+        callback: String,
+        nextStep: String? = null,
+        crossinline action: suspend CallbackQuery.(T) -> Unit
+    ) {
+        actionByCallback[callback] = { content ->
+            val instance = if (content.startsWith('{') || content.startsWith('[')) {
+                mapper.readValue<T>(content)
+            } else {
+                callbackContentSource.get(content.toUUID()).let {
+                    mapper.readValue<T>(it.content)
+                }
+            }
+
+            this.action(instance)
+
+            chainSource.save(chatId, nextStep)
         }
     }
 }

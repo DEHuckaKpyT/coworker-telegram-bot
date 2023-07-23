@@ -1,11 +1,11 @@
 package com.dehucka.plugins
 
 import com.dehucka.library.bot.BotHandling
+import com.dehucka.library.bot.callbackButton
 import com.dehucka.library.bot.chatId
+import com.dehucka.library.bot.inlineKeyboard
 import com.dehucka.library.exception.CustomException
 import com.dehucka.library.plugins.bot.TelegramBot
-import com.elbekd.bot.types.InlineKeyboardButton
-import com.elbekd.bot.types.InlineKeyboardMarkup
 import io.ktor.server.application.*
 
 
@@ -20,8 +20,23 @@ fun Application.configureTelegramBot() {
         handling {
             errorCommand()
             callCommand()
-            startCommand()
+            chainCommand()
         }
+    }
+}
+
+fun BotHandling.chainCommand() {
+    command("/chain", nextStep = "get_user_name") { (pathParam, lineParam) ->
+        sendMessage(chatId = chatId, text = "Введите своё имя")
+    }
+
+    step("get_user_name", nextStep = "get_user_surname") {
+        sendMessage(chatId, "Привет, $text!")
+        sendMessage(chatId, "А введи, пожалуйста, свою фамилию :)")
+    }
+
+    step("get_user_surname") {
+        sendMessage(chatId, "А мне нравится Фамилия '$text')")
     }
 }
 
@@ -35,34 +50,41 @@ fun BotHandling.errorCommand() {
     }
 
     command("/step_error", nextStep = "error_step") {
-        sendMessage(chatId, "next error")
+        sendMessage(chatId, "next message will error")
     }
 
-    message("error_step") {
+    step("error_step") {
         throw CustomException("error on message '$text'")
     }
 }
 
 fun BotHandling.callCommand() {
+    data class TestCallback(
+        val field: String
+    )
+
     command("/call") {
-        val button =
-            InlineKeyboardMarkup(listOf(listOf(InlineKeyboardButton("test callback", callbackData = "teeststestet"))))
-        sendMessage(chatId, "test", replyMarkup = button)
-    }
-}
+        val someInstance = TestCallback("some text")
+        val bigInstance =
+            TestCallback("long text long text long text long text long text long text long text long text long text long text long text long text long text long text long text")
 
-fun BotHandling.startCommand() {
-    command("/start", nextStep = "get_user_name") { (pathParam, lineParam) ->
-        sendMessage(chatId = chatId, text = "Введите своё имя")
-    }
-
-    message("get_user_name", answerMessage = "get_user_surname") {
-        sendMessage(chatId, "Привет, $text!")
-//        throw RuntimeException("тестовая ошибка")
-        sendMessage(chatId, "А введи, пожалуйста, свою фамилию :)")
+        val keyboard = inlineKeyboard(
+            callbackButton("Передача объекта", "with_callback", someInstance),
+            callbackButton("Пустой callback", "without_callback"),
+            callbackButton("Передача объекта с длиной callback'а больше 64 символов", "with_long_callback", bigInstance)
+        )
+        sendMessage(chatId, "test text with callback button", replyMarkup = keyboard)
     }
 
-    message("get_user_surname") {
-        sendMessage(chatId, "А мне нравится Фамилия '$text')")
+    callback<TestCallback>("with_callback") { testCallback ->
+        sendMessage(chatId, "Был передан объект $testCallback")
+    }
+
+    callback("without_callback") {
+        sendMessage(chatId, "Весь текст callback: $data")
+    }
+
+    callback<TestCallback>("with_long_callback") { testCallback ->
+        sendMessage(chatId, "Был передан объект $testCallback")
     }
 }

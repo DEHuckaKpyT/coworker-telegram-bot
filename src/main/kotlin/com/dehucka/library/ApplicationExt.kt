@@ -21,6 +21,7 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import kotlinx.coroutines.coroutineScope
 import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 
@@ -113,3 +114,7 @@ val client: HttpClient by lazy {
 }
 
 val mapper by lazy { ObjectMapper().apply { mapperConfig() } }
+
+fun String.toUUID(): UUID {
+    return UUID.fromString(this)
+}

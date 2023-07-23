@@ -1,4 +1,4 @@
-package com.dehucka.library.source
+package com.dehucka.library.source.chain
 
 import com.dehucka.library.model.Chain
 
@@ -10,6 +10,6 @@ import com.dehucka.library.model.Chain
  * @author Denis Matytsin
  */
 interface ChainSource {
-    suspend fun save(chatId: Long, handler: String?): Chain
+    suspend fun save(chatId: Long, step: String? = null, content: String? = null): Chain
     suspend fun get(chatId: Long): Chain
 }

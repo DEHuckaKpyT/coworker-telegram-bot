@@ -1,4 +1,4 @@
-package com.dehucka.library.source
+package com.dehucka.library.source.chain
 
 import com.dehucka.library.database.execute
 import com.dehucka.library.database.read
@@ -6,11 +6,13 @@ import com.dehucka.library.model.Chain
 
 class ChainSourceImpl : ChainSource {
 
-    override suspend fun save(chatId: Long, step: String?): Chain = execute {
+    override suspend fun save(chatId: Long, step: String?, content: String?): Chain = execute {
         Chain.findById(chatId)?.apply {
             this.step = step
+            this.content = content
         } ?: Chain.new(chatId) {
             this.step = step
+            this.content = content
         }
     }
 

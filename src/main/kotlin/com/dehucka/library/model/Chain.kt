@@ -15,6 +15,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 object Chains : LongIdTable("chain", "chat_id") {
 
     val step = varchar("step", 255).nullable()
+    val content = text("content").nullable()
 }
 
 class Chain(id: EntityID<Long>) : LongEntity(id) {
@@ -22,4 +23,5 @@ class Chain(id: EntityID<Long>) : LongEntity(id) {
 
     var chatId by Chains.id
     var step by Chains.step
+    var content by Chains.content
 }

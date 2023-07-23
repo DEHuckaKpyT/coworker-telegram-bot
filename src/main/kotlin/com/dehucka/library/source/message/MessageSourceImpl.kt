@@ -1,4 +1,4 @@
-package com.dehucka.library.source
+package com.dehucka.library.source.message
 
 import com.dehucka.library.database.execute
 import com.dehucka.library.model.TelegramMessage

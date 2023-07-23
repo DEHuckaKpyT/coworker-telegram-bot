@@ -1,5 +1,6 @@
 package com.dehucka.plugins
 
+import com.dehucka.library.model.CallbackContents
 import com.dehucka.library.model.Chains
 import com.dehucka.library.model.TelegramMessages
 import com.zaxxer.hikari.HikariConfig
@@ -39,7 +40,8 @@ fun Application.configureDatabase() {
         transaction {
             SchemaUtils.createMissingTablesAndColumns(
                 TelegramMessages,
-                Chains
+                Chains,
+                CallbackContents
             )
         }
     }
