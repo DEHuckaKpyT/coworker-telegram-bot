@@ -31,49 +31,70 @@ open class BotHandling(
 ) : TelegramBotChaining(application, bot, username, messageSource, chainSource, callbackContentSource) {
 
     inline fun command(
-        command: String, nextStep: String? = null, crossinline action: suspend Message.(Pair<String?, String?>) -> Unit
+        command: String, nextStep: String? = null,
+        enableCustomSteps: Boolean = false,
+        crossinline action: suspend Message.(Pair<String?, String?>) -> Unit
     ) {
         actionByCommand[command] = {
             this.action(it)
-            chainSource.save(chatId, nextStep)
+            if (!enableCustomSteps) {
+                chainSource.save(chatId, nextStep)
+            }
         }
     }
 
-    inline fun step(step: String, nextStep: String? = null, crossinline action: suspend Message.() -> Unit) {
+    inline fun step(
+        step: String,
+        nextStep: String? = null,
+        enableCustomSteps: Boolean = false,
+        crossinline action: suspend Message.() -> Unit
+    ) {
         actionByStep[step] = {
             this.action()
-            chainSource.save(chatId, nextStep)
+
+            if (!enableCustomSteps) {
+                chainSource.save(chatId, nextStep)
+            }
         }
     }
 
     inline fun <reified T> step(
         step: String,
         nextStep: String? = null,
+        enableCustomSteps: Boolean = false,
         crossinline action: suspend Message.(T) -> Unit
     ) {
         actionByStep[step] = { content ->
-            content ?: throw RuntimeException("Ожидается экземпляр класса ${T::class.simpleName}, но в chainSource.content ничего не сохранено.")
+            content
+                ?: throw RuntimeException("Ожидается экземпляр класса ${T::class.simpleName}, но в chainSource.content ничего не сохранено.")
 
             val instance = mapper.readValue<T>(content)
             this.action(instance)
-            chainSource.save(chatId, nextStep)
+
+            if (!enableCustomSteps) {
+                chainSource.save(chatId, nextStep)
+            }
         }
     }
 
     inline fun callback(
         callback: String,
         nextStep: String? = null,
+        enableCustomSteps: Boolean = false,
         crossinline action: suspend CallbackQuery.() -> Unit
     ) {
         actionByCallback[callback] = {
             this.action()
-            chainSource.save(chatId, nextStep)
+            if (!enableCustomSteps) {
+                chainSource.save(chatId, nextStep)
+            }
         }
     }
 
     inline fun <reified T> callback(
         callback: String,
         nextStep: String? = null,
+        enableCustomSteps: Boolean = false,
         crossinline action: suspend CallbackQuery.(T) -> Unit
     ) {
         actionByCallback[callback] = { content ->
@@ -87,7 +108,9 @@ open class BotHandling(
 
             this.action(instance)
 
-            chainSource.save(chatId, nextStep)
+            if (!enableCustomSteps) {
+                chainSource.save(chatId, nextStep)
+            }
         }
     }
 }

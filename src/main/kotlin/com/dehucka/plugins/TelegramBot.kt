@@ -18,11 +18,47 @@ import io.ktor.server.application.*
 fun Application.configureTelegramBot() {
     install(TelegramBot) {
         handling {
+            paramsCommand()
+            customChainCommand()
             chainCommand()
             chainWithSavingCommand()
             errorCommand()
             callCommand()
         }
+    }
+}
+
+fun BotHandling.paramsCommand() {
+    command("/command_with_params", nextStep = "get_user_name") { (pathParam, lineParam) ->
+        sendMessage(chatId = chatId, text = "Я вижу, что path param = $pathParam, а line param = $lineParam")
+    }
+}
+
+fun BotHandling.customChainCommand() {
+    command("/custom_chain", nextStep = "определить чётность") {
+        sendMessage(chatId = chatId, text = "Введите любую строку")
+    }
+
+    step("определить чётность", enableCustomSteps = true) {
+        val parity = if (text!!.length % 2 == 0) "чётная" else "нечётная"
+
+        sendMessage(chatId, "Ага. строка $parity. Введите что-нибудь, пожалуйста для продолжения.")
+
+        nextStep(chatId, parity)
+    }
+
+    step("чётная", enableCustomSteps = true) {
+        sendMessage(chatId, "Это ответ на сообщение после ЧЁТНОГО количества символов строки. Я жду ещё сообщение.")
+
+        nextStep(chatId, "one_more")
+    }
+
+    step("нечётная") {
+        sendMessage(chatId, "Это ответ на сообщение после НЕЧЁТНОГО количества символов строки. Больше ничего не жду.")
+    }
+
+    step("one_more") {
+        sendMessage(chatId, "Дождался)")
     }
 }
 
