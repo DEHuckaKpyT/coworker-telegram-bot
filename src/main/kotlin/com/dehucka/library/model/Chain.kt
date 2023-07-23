@@ -14,12 +14,12 @@ import org.jetbrains.exposed.dao.id.LongIdTable
  */
 object Chains : LongIdTable("chain", "chat_id") {
 
-    val handler = varchar("handler", 255).nullable()
+    val step = varchar("step", 255).nullable()
 }
 
 class Chain(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Chain>(Chains)
 
     var chatId by Chains.id
-    var handler by Chains.handler
+    var step by Chains.step
 }

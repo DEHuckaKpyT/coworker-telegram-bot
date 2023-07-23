@@ -6,11 +6,11 @@ import com.dehucka.library.model.Chain
 
 class ChainSourceImpl : ChainSource {
 
-    override suspend fun save(chatId: Long, handler: String?): Chain = execute {
+    override suspend fun save(chatId: Long, step: String?): Chain = execute {
         Chain.findById(chatId)?.apply {
-            this.handler = handler
+            this.step = step
         } ?: Chain.new(chatId) {
-            this.handler = handler
+            this.step = step
         }
     }
 

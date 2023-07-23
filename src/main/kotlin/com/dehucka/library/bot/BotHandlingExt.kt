@@ -1,5 +1,6 @@
 package com.dehucka.library.bot
 
+import com.elbekd.bot.types.CallbackQuery
 import com.elbekd.bot.types.Message
 import org.koin.core.Koin
 import org.koin.core.context.GlobalContext
@@ -58,5 +59,8 @@ fun <T : Any> BotHandling.getProperty(key: String) =
 fun BotHandling.getProperty(key: String, defaultValue: String) =
     getKoin().getProperty(key) ?: defaultValue
 
-val Message.chatId
+val Message.chatId: Long
     get() = chat.id
+val CallbackQuery.chatId: Long
+    get() = message?.chat?.id ?: from.id
+
