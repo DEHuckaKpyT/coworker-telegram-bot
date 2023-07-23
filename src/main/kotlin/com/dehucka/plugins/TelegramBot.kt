@@ -34,6 +34,21 @@ fun BotHandling.paramsCommand() {
     }
 }
 
+fun BotHandling.chainCommand() {
+    command("/simple_chain", nextStep = "get_user_name") {
+        sendMessage(chatId = chatId, text = "Введите своё имя")
+    }
+
+    step("get_user_name", nextStep = "get_user_surname") {
+        sendMessage(chatId, "Привет, $text!")
+        sendMessage(chatId, "А введи, пожалуйста, свою фамилию :)")
+    }
+
+    step("get_user_surname") {
+        sendMessage(chatId, "А мне нравится фамилия '$text')\nНо у меня нигде не сохранилось твоё имя(")
+    }
+}
+
 fun BotHandling.customChainCommand() {
     command("/custom_chain", nextStep = "определить чётность") {
         sendMessage(chatId = chatId, text = "Введите любую строку")
@@ -93,21 +108,6 @@ fun BotHandling.chainWithSavingCommand() {
     }
 }
 
-fun BotHandling.chainCommand() {
-    command("/simple_chain", nextStep = "get_user_name") {
-        sendMessage(chatId = chatId, text = "Введите своё имя")
-    }
-
-    step("get_user_name", nextStep = "get_user_surname") {
-        sendMessage(chatId, "Привет, $text!")
-        sendMessage(chatId, "А введи, пожалуйста, свою фамилию :)")
-    }
-
-    step("get_user_surname") {
-        sendMessage(chatId, "А мне нравится фамилия '$text')\nНо у меня нигде не сохранилось твоё имя(")
-    }
-}
-
 fun BotHandling.errorCommand() {
     command("/error") {
         throw RuntimeException("Любой текст")
@@ -153,6 +153,6 @@ fun BotHandling.callCommand() {
     }
 
     callback<TestCallback>("with_long_callback") { testCallback ->
-        sendMessage(chatId, "Был передан объект $testCallback")
+        sendMessage(chatId, "Был передан объект (с длиной callback'а больше 64 символов) $testCallback")
     }
 }
