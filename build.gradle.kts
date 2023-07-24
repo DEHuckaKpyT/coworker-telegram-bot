@@ -85,6 +85,7 @@ dependencies {
     implementation("com.netflix.eureka:eureka-client:$eureka_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
     implementation("io.konform:konform-jvm:0.4.0")
+    implementation("org.freemarker:freemarker:2.3.32")
     //endregion other
 
     //test

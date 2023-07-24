@@ -7,6 +7,8 @@ import com.dehucka.library.bot.inlineKeyboard
 import com.dehucka.library.exception.CustomException
 import com.dehucka.library.plugins.bot.TelegramBot
 import io.ktor.server.application.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 /**
@@ -17,7 +19,12 @@ import io.ktor.server.application.*
  */
 fun Application.configureTelegramBot() {
     install(TelegramBot) {
+        configureTemplating {
+            defaultEncoding = "UTF-8"
+        }
+
         handling {
+            startCommand()
             paramsCommand()
             customChainCommand()
             chainCommand()
@@ -25,6 +32,28 @@ fun Application.configureTelegramBot() {
             errorCommand()
             callCommand()
         }
+    }
+}
+
+fun BotHandling.startCommand() {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yy")
+
+    data class Simple(
+        val name: String,
+        val date: LocalDateTime
+
+    ) {
+        val formattedDate: String = date.format(formatter)
+    }
+
+    data class SomeClass(
+        val simple: Simple
+    )
+
+    command("/start") {
+        val someClass = SomeClass(Simple("nanananame", LocalDateTime.parse("2020-01-01T03:02:01")))
+
+        sendMessage(chatId, "Привет, \${simple.name} on '\${simple.formattedDate}'" with someClass)
     }
 }
 

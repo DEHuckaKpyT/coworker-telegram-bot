@@ -2,6 +2,8 @@ package com.dehucka.library.plugins.bot.config
 
 import com.dehucka.library.bot.BotHandling
 import com.elbekd.bot.Bot
+import freemarker.template.Configuration
+import freemarker.template.Version
 import io.ktor.server.config.*
 
 
@@ -17,6 +19,7 @@ data class TelegramBotConfig(private val config: ApplicationConfig) {
     var username = config.propertyOrNull("username")?.getString()
     var configureBot: Bot.() -> Unit = {}
     var handling: BotHandling.() -> Unit = {}
+    var templateConfig = Configuration(Version("2.3.32"))
 
     fun configureBot(block: Bot.() -> Unit) {
         configureBot = block
@@ -24,5 +27,9 @@ data class TelegramBotConfig(private val config: ApplicationConfig) {
 
     fun handling(block: BotHandling.() -> Unit) {
         handling = block
+    }
+
+    fun configureTemplating(block: Configuration.() -> Unit) {
+        templateConfig.block()
     }
 }

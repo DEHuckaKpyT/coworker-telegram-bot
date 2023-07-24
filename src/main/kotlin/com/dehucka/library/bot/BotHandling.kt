@@ -12,7 +12,11 @@ import com.elbekd.bot.Bot
 import com.elbekd.bot.types.CallbackQuery
 import com.elbekd.bot.types.Message
 import com.fasterxml.jackson.module.kotlin.readValue
+import freemarker.template.Configuration
+import freemarker.template.Template
+import freemarker.template.Version
 import io.ktor.server.application.*
+import java.io.StringWriter
 
 
 /**
@@ -27,7 +31,8 @@ open class BotHandling(
     username: String,
     messageSource: MessageSource = MessageSourceImpl(),
     chainSource: ChainSource = ChainSourceImpl(),
-    callbackContentSource: CallbackContentSource = CallbackContentSourceImpl()
+    callbackContentSource: CallbackContentSource = CallbackContentSourceImpl(),
+    private val templateConfiguration: Configuration = Configuration(Version("2.3.32"))
 ) : TelegramBotChaining(application, bot, username, messageSource, chainSource, callbackContentSource) {
 
     inline fun command(
@@ -112,5 +117,18 @@ open class BotHandling(
                 chainSource.save(chatId, nextStep)
             }
         }
+    }
+
+    infix fun String.with(instance: Any): String {
+        val writer = StringWriter()
+
+        try {
+            val markerTemplate = Template("template", this, templateConfiguration)
+            markerTemplate.process(instance, writer)
+        } catch (exc: Exception) {
+            throw RuntimeException(exc)
+        }
+
+        return writer.toString()
     }
 }
