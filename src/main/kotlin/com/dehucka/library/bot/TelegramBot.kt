@@ -1,6 +1,7 @@
 package com.dehucka.library.bot
 
 import com.dehucka.library.source.message.MessageSource
+import com.dehucka.plugins.TelegramBotTemplate
 import com.elbekd.bot.Bot
 import com.elbekd.bot.model.toChatId
 import com.elbekd.bot.types.*
@@ -12,7 +13,8 @@ import com.elbekd.bot.types.*
  *
  * @author Denis Matytsin
  */
-open class TelegramBotMethods(
+open class TelegramBot(
+    val template: TelegramBotTemplate,
     private val bot: Bot,
     private val messageService: MessageSource
 ) {

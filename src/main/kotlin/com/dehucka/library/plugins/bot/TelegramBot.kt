@@ -2,6 +2,7 @@ package com.dehucka.library.plugins.bot
 
 import com.dehucka.library.bot.BotHandling
 import com.dehucka.library.plugins.bot.config.TelegramBotConfig
+import com.dehucka.plugins.TelegramBotTemplate
 import com.elbekd.bot.Bot
 import io.ktor.server.application.*
 import io.ktor.server.application.hooks.*
@@ -21,7 +22,8 @@ val TelegramBot = createApplicationPlugin(name = "telegram-bot", "telegram-bot",
     val token = pluginConfig.token ?: throw RuntimeException("Telegram-bot TOKEN must not be empty!")
     val username = pluginConfig.username ?: throw RuntimeException("Telegram-bot USERNAME must not be empty!")
     val bot = Bot.createPolling(token, username)
-    val botHandling = BotHandling(application, bot, username)
+    val template = TelegramBotTemplate(application.environment.config.config("telegram-bot.template"))
+    val botHandling = BotHandling(application, template, bot, username)
 
     pluginConfig.configureBot(bot)
     pluginConfig.handling(botHandling)

@@ -8,6 +8,7 @@ import com.dehucka.library.source.chain.ChainSourceImpl
 import com.dehucka.library.source.message.MessageSource
 import com.dehucka.library.source.message.MessageSourceImpl
 import com.dehucka.library.toUUID
+import com.dehucka.plugins.TelegramBotTemplate
 import com.elbekd.bot.Bot
 import com.elbekd.bot.types.CallbackQuery
 import com.elbekd.bot.types.Message
@@ -27,13 +28,14 @@ import java.io.StringWriter
  */
 open class BotHandling(
     application: Application,
+    template: TelegramBotTemplate,
     bot: Bot,
     username: String,
     messageSource: MessageSource = MessageSourceImpl(),
     chainSource: ChainSource = ChainSourceImpl(),
     callbackContentSource: CallbackContentSource = CallbackContentSourceImpl(),
     private val templateConfiguration: Configuration = Configuration(Version("2.3.32"))
-) : TelegramBotChaining(application, bot, username, messageSource, chainSource, callbackContentSource) {
+) : TelegramBotChaining(application, template, bot, username, messageSource, chainSource, callbackContentSource) {
 
     inline fun command(
         command: String, nextStep: String? = null,

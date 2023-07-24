@@ -6,6 +6,7 @@ import com.dehucka.library.mapper
 import com.dehucka.library.source.callback.CallbackContentSource
 import com.dehucka.library.source.chain.ChainSource
 import com.dehucka.library.source.message.MessageSource
+import com.dehucka.plugins.TelegramBotTemplate
 import com.elbekd.bot.Bot
 import com.elbekd.bot.types.CallbackQuery
 import com.elbekd.bot.types.Message
@@ -23,12 +24,13 @@ import io.ktor.server.application.*
  */
 open class TelegramBotChaining(
     val application: Application,
-    private val bot: Bot,
+    template: TelegramBotTemplate,
+    bot: Bot,
     val username: String,
     private val messageSource: MessageSource,
     val chainSource: ChainSource,
     val callbackContentSource: CallbackContentSource
-) : TelegramBotMethods(bot, messageSource) {
+) : TelegramBot(template, bot, messageSource) {
 
     val actionByCommand: MutableMap<String, suspend Message.(Pair<String?, String?>) -> Unit> = hashMapOf()
     val actionByStep: MutableMap<String, suspend Message.(String?) -> Unit> = hashMapOf()
