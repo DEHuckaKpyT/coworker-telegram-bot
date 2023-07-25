@@ -59,6 +59,7 @@ fun <T : Any> BotHandling.getProperty(key: String) =
 fun BotHandling.getProperty(key: String, defaultValue: String) =
     getKoin().getProperty(key) ?: defaultValue
 
+fun TelegramBot.template(path: String): String = templateConfig.property(path).getString()
 val Message.chatId: Long
     get() = chat.id
 val CallbackQuery.chatId: Long

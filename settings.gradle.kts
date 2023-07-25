@@ -1,1 +1,1 @@
-rootProject.name = "com.dehucka.telegram-bot"
+rootProject.name = "telegram-bot"

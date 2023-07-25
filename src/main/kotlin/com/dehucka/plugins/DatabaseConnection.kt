@@ -3,6 +3,10 @@ package com.dehucka.plugins
 import com.dehucka.library.model.CallbackContents
 import com.dehucka.library.model.Chains
 import com.dehucka.library.model.TelegramMessages
+import com.dehucka.models.Project
+import com.dehucka.models.Projects
+import com.dehucka.models.TelegramUsers
+import com.dehucka.models.TrackedHours
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -41,8 +45,15 @@ fun Application.configureDatabase() {
             SchemaUtils.createMissingTablesAndColumns(
                 TelegramMessages,
                 Chains,
-                CallbackContents
+                CallbackContents,
+                TelegramUsers,
+                Projects,
+                TrackedHours
             )
+
+//            Project.new { name = "proj1" }
+//            Project.new { name = "proj2" }
+//            Project.new { name = "proj3" }
         }
     }
 
