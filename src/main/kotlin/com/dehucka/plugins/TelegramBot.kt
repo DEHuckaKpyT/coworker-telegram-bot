@@ -1,13 +1,9 @@
 package com.dehucka.plugins
 
-import com.dehucka.library.bot.BotHandling
-import com.dehucka.library.bot.callbackButton
-import com.dehucka.library.bot.chatId
-import com.dehucka.library.bot.inlineKeyboard
+import com.dehucka.library.bot.*
 import com.dehucka.library.exception.CustomException
 import com.dehucka.library.plugins.bot.TelegramBot
 import io.ktor.server.application.*
-import io.ktor.server.config.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -36,11 +32,8 @@ fun Application.configureTelegramBot() {
     }
 }
 
-fun TelegramBotTemplate.template(path: String): String = templateConfig.property(path).getString()
-
-data class TelegramBotTemplate(val templateConfig: ApplicationConfig) {
-    val start = template("start")
-}
+fun TelegramBot.template(path: String): String = templateConfig.property(path).getString()
+val TelegramBot.start get() = template("start")
 
 fun BotHandling.startCommand() {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yy")
@@ -60,7 +53,7 @@ fun BotHandling.startCommand() {
     command("/start") {
         val someClass = SomeClass(Simple("nanananame", LocalDateTime.parse("2020-01-01T03:02:01")))
 
-        sendMessage(chatId, template.start with someClass)
+        sendMessage(chatId, start with someClass)
     }
 }
 

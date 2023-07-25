@@ -1,10 +1,13 @@
 package com.dehucka.library.bot
 
 import com.dehucka.library.source.message.MessageSource
-import com.dehucka.plugins.TelegramBotTemplate
 import com.elbekd.bot.Bot
 import com.elbekd.bot.model.toChatId
 import com.elbekd.bot.types.*
+import freemarker.template.Configuration
+import freemarker.template.Template
+import io.ktor.server.application.*
+import java.io.StringWriter
 
 
 /**
@@ -14,10 +17,26 @@ import com.elbekd.bot.types.*
  * @author Denis Matytsin
  */
 open class TelegramBot(
-    val template: TelegramBotTemplate,
+    val application: Application,
     private val bot: Bot,
-    private val messageService: MessageSource
+    private val messageService: MessageSource,
+    private val templateConfiguration: Configuration
 ) {
+
+    val templateConfig = application.environment.config.config("telegram-bot.template")
+
+    infix fun String.with(instance: Any): String {
+        val writer = StringWriter()
+
+        try {
+            val markerTemplate = Template("template", this, templateConfiguration)
+            markerTemplate.process(instance, writer)
+        } catch (exc: Exception) {
+            throw RuntimeException(exc)
+        }
+
+        return writer.toString()
+    }
 
     // Telegram methods
     suspend fun getMe(): User = bot.getMe()
